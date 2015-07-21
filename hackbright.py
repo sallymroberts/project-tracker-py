@@ -37,17 +37,45 @@ def make_new_student(first_name, last_name, github):
 
 def get_project_by_title(title):
     """Given a project title, print information about the project."""
-    pass
+    
+    QUERY = """
+        SELECT title, description 
+        FROM projects
+        WHERE title = ?
+        """
+    db_cursor.execute(QUERY, (title,)) 
+    row = db_cursor.fetchone()
+    print "Project Title: %s\n Project description: %s" % (
+        row[0], row[1])
 
 
-def get_grade_by_github_title(github, title):
+
+def get_grade_by_github_title(student_github, project_title):
     """Print grade student received for a project."""
-    pass
+    QUERY = """
+        SELECT student_github, project_title, grade
+        FROM grades
+        WHERE student_github = ? 
+        AND project_title = ?
+        """
+
+    db_cursor.execute(QUERY, (student_github, project_title))
+    row = db_cursor.fetchone()
+    print "Github account: %s \nProject title: %s\nGrade: %s" % (
+        row[0], row[1], row[2])
 
 
-def assign_grade(github, title, grade):
+
+def assign_grade(student_github, project_title, grade):
     """Assign a student a grade on an assignment and print a confirmation."""
-    pass
+    QUERY = """
+    INSERT INTO Grades 
+    VALUES (?, ?, ?)"""
+    db_cursor.execute(QUERY, (student_github, project_title, grade))
+    db_connection.commit()
+    print "Successfully added: %s, %s \nGrade: %s" % (student_github, project_title, grade)
+
+
 
 
 def handle_input():
@@ -72,6 +100,22 @@ def handle_input():
         elif command == "new_student":
             first_name, last_name, github = args   # unpack!
             make_new_student(first_name, last_name, github)
+
+        elif command == "project":
+            title = args[0]
+            get_project_by_title(title)
+
+        elif command == "student_grade":
+            student_github = args[0]
+            project_title = args[1]
+            get_grade_by_github_title(student_github, project_title)
+
+        elif command == "add_grade":
+            student_github, project_title, grade = args
+            assign_grade(student_github, project_title, grade)
+
+
+
 
 
 if __name__ == "__main__":
